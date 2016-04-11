@@ -25,7 +25,7 @@ def isSymbol(c):
     return ord(c) < 128 or c.isdigit() or c.isalpha() or c in symbols
 
 def containHankaku(s):
-    return mojimoji.zen_to_han(s) == s and mojimoji.han_to_zen(s) != s:
+    return mojimoji.zen_to_han(s) == s and mojimoji.han_to_zen(s) != s
 
 def isAscii(c):
     return ord(c) < 128
