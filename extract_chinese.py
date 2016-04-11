@@ -15,7 +15,7 @@ def process(buffer):
     if "rejected" in buffer[2]:
         return []
     fchars = buffer[0].rstrip().split()[1:] # remove the first word "zh:"
-    return " ".join(fchars)
+    return "".join(fchars)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(prog="./extract.py")
