@@ -4,6 +4,7 @@ import fileinput
 import re
 import sys
 import argparse
+import mojimoji
 
 """
 SEM Semantic link
@@ -22,6 +23,9 @@ MTA link for Meta word
 def isSymbol(c):
     symbols = ["。", "？", "！", "…"]
     return ord(c) < 128 or c.isdigit() or c.isalpha() or c in symbols
+
+def containHankaku(s):
+    return mojimoji.zen_to_han(s) == s and mojimoji.han_to_zen(s) != s:
 
 def isAscii(c):
     return ord(c) < 128
@@ -63,7 +67,7 @@ if __name__ == "__main__":
 
                 for i in range(len(token)):
                     # if isSymbol(token[i]) and i < len(token) - 1 and isSymbol(token[i+1]):
-                    if isAscii(token[i]) and i < len(token) - 1 and isAscii(token[i+1]):
+                    if containHankaku(token[i]) and i < len(token) - 1 and containHankaku(token[i+1]):
                         continue
 
                     newCategory = getCategory(tags[cur])

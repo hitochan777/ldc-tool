@@ -25,11 +25,7 @@ def overwrite(sline, tline):
     return " ".join(result)
         
 def containHankaku(s):
-    for c in s:
-        if mojimoji.zen_to_han(s) == s:
-            return True
-
-    return False
+    return mojimoji.zen_to_han(s) == s and mojimoji.han_to_zen(s) != s:
 
 def containsAscii(s):
     try:
