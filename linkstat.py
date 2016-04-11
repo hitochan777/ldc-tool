@@ -51,10 +51,7 @@ if __name__ == "__main__":
                 for i in range(len(token)):
                     if isSymbol(token[i])  and i < len(token) - 1 and isSymbol(token[i+1]):
                         continue
-                    try:
-                        category = getCategory(tags[cur])
-                    except:
-                        sys.exit(-1)
+                    category = getCategory(tags[cur])
 
                     s.add(category)
                     if len(s) > 1:

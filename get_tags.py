@@ -59,6 +59,8 @@ if __name__=="__main__":
             result = process(buffer)
             if result is not None:
                 print(result)
+            else:
+                print("rejected")
 
             buffer = []
         elif not line.startswith("#"):
