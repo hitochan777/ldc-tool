@@ -14,8 +14,8 @@ def process(buffer):
         sys.exit("len(buffer) is not 3")
     if "rejected" in buffer[2]:
         return "rejected"
-    fchars = buffer[0].rstrip().split()[1:] # remove the first word "zh:"
-    return "".join(fchars)
+    ewords = buffer[1].rstrip().split(" ")[1:] # remove the first word "en:"
+    return " ".join(ewords)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(prog="./extract.py")
