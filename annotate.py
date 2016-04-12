@@ -45,7 +45,7 @@ if __name__ == "__main__":
             tagline = tagfile.readline().rstrip()
             tags = re.split(r" +", tagline)
             tokenline = tokenfile.readline().rstrip()
-            if tokenline.startswith("rejected"):
+            if tagline.startswith("rejected") or tokenline.startswith("rejected"):
                 print("rejected")
                 continue
             tokens = re.split(r" +", tokenline)
@@ -60,16 +60,14 @@ if __name__ == "__main__":
                 eIndices = set()
 
                 for i in range(len(token)):
-                    # if isSymbol(token[i]) and i < len(token) - 1 and isSymbol(token[i+1]):
-                    if utils.containChineseCharacter(token[i]) and i < len(token) - 1 and utils.containChineseCharacter(token[i+1]):
+                    if not utils.containChineseCharacter(token[i]) and i < len(token) - 1:
                         continue
 
                     try:
                         newCategory = getCategory(tags[cur])
                     except:
-                        print(len(tags), token[i])
+                        print(len(tags), cur,token[i], " ".join(tags))
 
-                    # print(newCategory)
                     if category == "":
                         category = newCategory
                     elif category != newCategory:

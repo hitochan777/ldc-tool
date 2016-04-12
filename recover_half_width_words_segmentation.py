@@ -23,11 +23,12 @@ def overwrite(sline, tline):
     for i in range(1,len(cutIndices)):
         result.append(traw[cutIndices[i-1]:cutIndices[i]])
 
+    assert sraw == "".join(result)
+
     return " ".join(result)
 
 def findIndices(li, condition):
     return [index for index, elem in enumerate(li) if condition(elem)]
-
 
 def recover(sline, tline):
     """

@@ -11,3 +11,10 @@ def containChineseCharacter(s):
 
     return False
 
+def isChineseString(s):
+    for c in s:
+        if not unicodedata.name(c).startswith("CJK UNIFIED IDEOGRAPH"):
+            return False
+
+    return True 
+
