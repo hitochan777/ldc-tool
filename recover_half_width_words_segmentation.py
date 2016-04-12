@@ -4,7 +4,8 @@ import argparse
 from bisect import *
 from itertools import accumulate
 from collections import defaultdict
-import mojimoji
+
+import utils
 
 def overwrite(sline, tline):
     cutIndices = [0]
@@ -23,19 +24,6 @@ def overwrite(sline, tline):
         result.append(traw[cutIndices[i-1]:cutIndices[i]])
 
     return " ".join(result)
-        
-def containHankaku(s):
-    return mojimoji.zen_to_han(s) == s and mojimoji.han_to_zen(s) != s
-
-def containsAscii(s):
-    try:
-        for c in s:
-            if ord(c) < 128:
-                return True     
-    except:
-        return False
-
-    return False
 
 def findIndices(li, condition):
     return [index for index, elem in enumerate(li) if condition(elem)]
@@ -49,7 +37,7 @@ def recover(sline, tline):
     swords = sline.split(" ") 
     swords_tmp = [swords[0]]
     for index in range(1, len(swords)):
-        if containHankaku(swords_tmp[-1][-1]) and containHankaku(swords[index][0]):
+        if utils.containChineseCharacter(swords_tmp[-1][-1]) and utils.containChineseCharacter(swords[index][0]):
             swords_tmp.append(swords_tmp.pop() + swords[index])
         else:
             swords_tmp.append(swords[index]) 
@@ -63,7 +51,7 @@ def recover(sline, tline):
     cutIndices = defaultdict(list)
     result = []
     for tp in range(len(twords)):
-        if containHankaku(twords[tp]):
+        if utils.containChineseCharacter(twords[tp]):
             index = bisect_left(endList, twcnt)
             if index > 0:
                 cutIndices[index].append(twcnt - endList[index - 1])
@@ -77,7 +65,7 @@ def recover(sline, tline):
             start = 0
             for cutIndex in cutIndices[index]: # we know that cutIndices[index] is sorted from the beginning
                 word = token[start:cutIndex]
-                indices = findIndices(word, lambda x: not containHankaku(x)) # Actually indices will always be **singular list**
+                indices = findIndices(word, lambda x: not utils.containChineseCharacter(x)) # Actually indices will always be **singular list**
                 if len(indices) == 0 or indices[0] == 0:
                     result.append(word)
 
@@ -90,7 +78,7 @@ def recover(sline, tline):
 
             if start != len(token):
                 word = token[start:]
-                indices = findIndices(word, lambda x: not containHankaku(x)) # Actually indices will always be **singular list**
+                indices = findIndices(word, lambda x: not utils.containChineseCharacter(x)) # Actually indices will always be **singular list**
                 if len(indices) == 0 or indices[0] == 0:
                     result.append(word)
                 else:

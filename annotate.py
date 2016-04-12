@@ -4,7 +4,8 @@ import fileinput
 import re
 import sys
 import argparse
-import mojimoji
+
+import utils
 
 """
 SEM Semantic link
@@ -19,16 +20,6 @@ TIN (Translated) Incorrect link
 NTR Not Translated link
 MTA link for Meta word
 """
-
-def isSymbol(c):
-    symbols = ["。", "？", "！", "…"]
-    return ord(c) < 128 or c.isdigit() or c.isalpha() or c in symbols
-
-def containHankaku(s):
-    return mojimoji.zen_to_han(s) == s and mojimoji.han_to_zen(s) != s
-
-def isAscii(c):
-    return ord(c) < 128
 
 def getCategory(linkTag):
     if ":TRA" in linkTag:
@@ -54,6 +45,9 @@ if __name__ == "__main__":
             tagline = tagfile.readline().rstrip()
             tags = re.split(r" +", tagline)
             tokenline = tokenfile.readline().rstrip()
+            if tokenline.startswith("rejected"):
+                print("rejected")
+                continue
             tokens = re.split(r" +", tokenline)
             tokenNum += len(tokens)
             buffer = []
@@ -67,10 +61,14 @@ if __name__ == "__main__":
 
                 for i in range(len(token)):
                     # if isSymbol(token[i]) and i < len(token) - 1 and isSymbol(token[i+1]):
-                    if containHankaku(token[i]) and i < len(token) - 1 and containHankaku(token[i+1]):
+                    if utils.containChineseCharacter(token[i]) and i < len(token) - 1 and utils.containChineseCharacter(token[i+1]):
                         continue
 
-                    newCategory = getCategory(tags[cur])
+                    try:
+                        newCategory = getCategory(tags[cur])
+                    except:
+                        print(len(tags), token[i])
+
                     # print(newCategory)
                     if category == "":
                         category = newCategory
