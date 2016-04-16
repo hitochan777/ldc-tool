@@ -2,63 +2,53 @@
 
 import sys
 import argparse
-from bisect import *
-from itertools import accumulate
-from collections import defaultdict
 
-import utils
+def recover(baseChars, twords, delimiter=" "):
+    """
+    baseChars <-> twords => recovered twords 
+    """
+    if type(baseChars) == str:
+        baseChars = baseChars.split(delimiter) 
 
-def recover(sline, tline):
-    """
-    sline <-> tline => recovered tline
-    漢 漢 10 漢 <-> 漢 漢10漢 => 漢 漢 10 漢
-    漢 漢 10 漢 <-> 漢漢 1 0漢 => 漢漢 10 漢
-    漢 漢 10 20 漢 <-> 漢 漢1 020漢 => 漢 漢 10 20 漢
-    """
-    swords = sline.split(" ")
-    twords = tline.split(" ")
-    swords = list(filter(lambda word: not utils.containChineseCharacter(word), swords))
+    if type(twords) == str:
+        twords = twords.split(delimiter)
+
     result = []
     tcur = twords.pop(0)
-    while len(swords) > 0:
-        if utils.isChineseString(tcur):
-            result.append(tcur)
-            if len(twords) > 0:
-                tcur = twords.pop(0)
-        else:
-            index = tcur.find(swords[0])
-            while index < 0: 
-                tcur += twords.pop(0) 
-                index = tcur.find(swords[0])
-            
-            if index > 0:
-                result.append(tcur[:index])
-                tcur = tcur[index:]
-            
-            result.append(tcur[:len(swords[0])])
-            tcur = tcur[len(swords[0]):]
-            if len(tcur) == 0 and len(twords) > 0:
-                tcur = twords.pop(0)
+    bcur = baseChars.pop(0)
+    while len(bcur) > 0:
+        while len(baseChars) > 0 and bcur + baseChars[0] in tcur:
+            bcur += baseChars.pop(0)
 
-            swords.pop(0)
-    
-    if tcur != "":
-        result += [tcur]
+        index = tcur.find(bcur)
+        while index < 0:
+            tcur += twords.pop(0) 
+            index = tcur.find(bcur)
 
-    result += twords
+        result.append(tcur[0:len(bcur)])
+        tcur = tcur[len(bcur):]
+        bcur = ""
+        if len(tcur) == 0 and len(twords) > 0:
+            tcur = twords.pop(0)
+
+        if len(baseChars) > 0:
+            bcur = baseChars.pop(0)
+
     return " ".join(result)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Recover half width words segmentation of file2 in file1')
-    parser.add_argument('source', type=str,  help='source file')
-    parser.add_argument('target', type=str,  help='target file')
+    parser.add_argument('base', type=str,  help='filename of base chars')
+    parser.add_argument('target', type=str,  help='filename of segmentation')
     args = parser.parse_args()
     
-    with open(args.source, "r") as source, open(args.target, "r") as target:
+    with open(args.base, "r") as source, open(args.target, "r") as target:
         while True:
-            sline = source.readline().strip()
-            tline = target.readline().strip()
-            if sline=="" or tline=="":
+            base= base.readline().strip()
+            target = target.readline().strip()
+            if base == "" or target == "":
                  break
 
-            print(recover(sline, tline))   
+            baseChars = base.split(" ") 
+            line = target.split(" ")
+            print(recover(baseChars, line))
