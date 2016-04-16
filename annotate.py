@@ -21,6 +21,46 @@ NTR Not Translated link
 MTA link for Meta word
 """
 
+def annotate(tags, tokens, baseChars):
+    if type(tags) == str:
+        tags = tags.split(" ")
+
+    if type(tokens) == str:
+        tokens = tokens.split(" ")
+
+    if type(baseChars) == str:
+        baseChars = baseChars.split(" ")
+
+    if tags[0].startswith("rejected") or tokens[0].startswith("rejected"):
+        return "rejected"
+        
+    buffer = []
+    cur = 0
+    for wordIndex, token in enumerate(tokens):
+        category = ""
+        eIndices = set()
+        while token != "": 
+            assert token.startswith(baseChars[cur])
+            newCategory = getCategory(tags[cur])
+            if category == "":
+                category = newCategory
+            elif category != newCategory:
+                return "ignored"
+
+            matchObj = re.search(r"\((.*)\)", tags[cur])
+            assert matchObj is not None, "eIndices are not specified in %s" % (args.tagfile,)
+            eIndicesString = matchObj.groups()[0]
+            if eIndicesString != "":
+                eIndices.update(eIndicesString.split(","))
+
+            token = token[len(baseChars[cur]):]
+            cur += 1
+        else:
+            for eIndex in eIndices:
+                buffer.append("%d-%s[%s]" % (wordIndex,eIndex,category))
+
+    return " ".join(buffer)
+
 def getCategory(linkTag):
     if ":TRA" in linkTag:
         return "sure"
@@ -34,61 +74,19 @@ if __name__ == "__main__":
 """)
     parser.add_argument('tagfile', type=str, help='tagfile')
     parser.add_argument('tokenfile', type=str, help='tokenfile')
+    parser.add_argument('base', type=str, help='filename for base characters')
     args = parser.parse_args()
 
-    tokenNum = 0
-    sentenceNum = 0
-    multipleTagTokenNum = 0
-    multipleTagSentenceNum = 0
-    with open(args.tagfile, "r") as tagfile, open(args.tokenfile, "r") as tokenfile:
+    with open(args.tagfile, "r") as tagfile, open(args.tokenfile, "r") as tokenfile, open(args.base, "r") as base:
         while True:
-            tagline = tagfile.readline().rstrip()
-            tags = re.split(r" +", tagline)
-            tokenline = tokenfile.readline().rstrip()
-            if tagline.startswith("rejected") or tokenline.startswith("rejected"):
-                print("rejected")
-                continue
-            tokens = re.split(r" +", tokenline)
-            tokenNum += len(tokens)
-            buffer = []
-            if tagline=="" or tokenline=="":
+            tagLine = tagfile.readline().strip()
+            tokenLine = tokenfile.readline().strip()
+            baseLine = base.readline().strip()
+            if tagLine == "" or tokenLine == "" or baseLine == "":
                 break
 
-            cur = 0
-            for wordIndex, token in enumerate(tokens):
-                category = ""
-                eIndices = set()
+            tags = tagLine.split(" ")
+            tokens = tokenLine.split(" ")
+            baseChars = baseLine.split(" ")
 
-                for i in range(len(token)):
-                    if not utils.containChineseCharacter(token[i]) and i < len(token) - 1:
-                        continue
-
-                    try:
-                        newCategory = getCategory(tags[cur])
-                    except:
-                        print(len(tags), cur,token[i], " ".join(tags))
-
-                    if category == "":
-                        category = newCategory
-                    elif category != newCategory:
-                        buffer = None
-                        break
-
-                    matchObj = re.search(r"\((.*)\)", tags[cur])
-                    assert matchObj is not None, "eIndices are not specified in %s" % (args.tagfile,)
-                    eIndicesString = matchObj.groups()[0]
-                    if eIndicesString != "":
-                        eIndices.update(eIndicesString.split(","))
-
-                    cur += 1
-                else:
-                    for eIndex in eIndices:
-                        buffer.append("%d-%s[%s]" % (wordIndex,eIndex,category))
-
-                if buffer is None:
-                    break
-
-            if buffer is None: 
-                print("ignored")
-            else:
-                print(" ".join(buffer))
+            print(annotate(tags, tokens, baseChars)) 
