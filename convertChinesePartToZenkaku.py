@@ -3,7 +3,7 @@
 import sys
 import argparse
 
-import mojimoj
+import mojimoji
 
 """
 """
@@ -18,7 +18,7 @@ if __name__=="__main__":
             if line.startswith("zh:"):
                 result = []
                 tokens = line.split(" ")
-                for token in tokens:
+                for token in tokens[1:]:
                     result.append(mojimoji.han_to_zen(token))
 
                 print("zh: %s" % (" ".join(result)))
