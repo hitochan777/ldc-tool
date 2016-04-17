@@ -42,9 +42,9 @@ if __name__ == "__main__":
     parser.add_argument('target', type=str,  help='filename of segmentation')
     args = parser.parse_args()
     
-    with open(args.base, "r") as source, open(args.target, "r") as target:
+    with open(args.base, "r") as base, open(args.target, "r") as target:
         while True:
-            base= base.readline().strip()
+            base = base.readline().strip()
             target = target.readline().strip()
             if base == "" or target == "":
                  break
