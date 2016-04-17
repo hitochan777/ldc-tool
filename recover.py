@@ -44,11 +44,11 @@ if __name__ == "__main__":
     
     with open(args.base, "r") as base, open(args.target, "r") as target:
         while True:
-            base = base.readline().strip()
-            target = target.readline().strip()
-            if base == "" or target == "":
+            baseLine = base.readline().strip()
+            targetLine = target.readline().strip()
+            if baseLine == "" or targetLine == "":
                  break
 
-            baseChars = base.split(" ") 
-            line = target.split(" ")
+            baseChars = baseLine.split(" ") 
+            line = targetLine.split(" ")
             print(recover(baseChars, line))
