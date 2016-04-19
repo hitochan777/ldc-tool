@@ -59,7 +59,7 @@ if __name__=="__main__":
     buffer = []
     for line in fileinput.input():
         if line.startswith("#") and len(buffer)==3:
-            result = process(buffer)
+            result = getTags(buffer)
             if result is not None:
                 print(result)
             else:
@@ -70,6 +70,6 @@ if __name__=="__main__":
             buffer.append(line)
 
     if len(buffer)==3:
-        result = process(buffer)
+        result = getTags(buffer)
         if result is not None:
             print(result)
