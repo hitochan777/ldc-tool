@@ -8,11 +8,13 @@ import argparse
 """
 """
 
-def process(buffer):
+def getTags(buffer):
     if len(buffer)!=3:
         sys.exit("len(buffer) is not 3")
+
     if "rejected" in buffer[2]:
         return None
+
     flen = len(buffer[0].rstrip().split()[1:]) # remove the first word "zh:"
     tags = [None]*flen
     wa = buffer[2].rstrip().split()[1:] # remove the first word "wa:"
@@ -24,11 +26,12 @@ def process(buffer):
             continue
 
         for e in ea.split(","):
-            matchObj = re.search(r"(\d+)", e)
+            matchObj = re.search(r"(?P<index>\d+)(?:\[(?P<wordtag>.+)\])?", e)
             if matchObj is None:
                 break
-            eIndex = matchObj.groups()[0]
-            eIndices.append(int(eIndex) - 1)
+
+            eIndex = matchObj.group("index")
+            eIndices.append({"index": int(eIndex) - 1, "wordTag": matchObj.group("wordtag") if matchObj.group("wordtag") is not None else ""})
 
         linkTag = re.search(r"\((.*)\)", a).groups()[0]
         li = []
@@ -43,7 +46,7 @@ def process(buffer):
                 raise RuntimeError('a source word is assigned tags twice!')
                 sys.exit(1)
 
-            tags[int(f) - 1] = "%s:%s(%s)" % (linkTag, wordTag, ",".join(map(str, eIndices)))
+            tags[int(f) - 1] = "%s:%s(%s)" % (linkTag, wordTag, ",".join(map(lambda x: "%s:%s" % (str(x["index"]), x["wordTag"]), eIndices)))
             cnt += 1
 
     if cnt != flen:

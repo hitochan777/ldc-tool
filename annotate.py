@@ -37,35 +37,39 @@ def annotate(tags, tokens, baseChars):
     buffer = []
     cur = 0
     for wordIndex, token in enumerate(tokens):
-        category = ""
-        eIndices = set()
+        sourceCategory = ""
+        eIndices = {} 
         while token != "": 
             assert token.startswith(baseChars[cur])
             newCategory = getCategory(tags[cur])
-            if category == "":
-                category = newCategory
-            elif category != newCategory:
+            if sourceCategory == "":
+                sourceCategory = newCategory
+            elif sourceCategory != newCategory:
                 return "ignored"
 
             matchObj = re.search(r"\((.*)\)", tags[cur])
             assert matchObj is not None, "eIndices are not specified in %s" % (args.tagfile,)
             eIndicesString = matchObj.groups()[0]
             if eIndicesString != "":
-                eIndices.update(eIndicesString.split(","))
+                for index, tag in map(lambda x: x.split(":"), eIndicesString.split(",")):
+                    if sourceCategory == "possible":
+                        eIndices[index] = "possible"
+                    else:
+                        eIndices[index] = "sure" if tag == "" else "possible"
 
             token = token[len(baseChars[cur]):]
             cur += 1
         else:
             for eIndex in eIndices:
-                buffer.append("%d-%s[%s]" % (wordIndex,eIndex,category))
+                buffer.append("%d-%s[%s]" % (wordIndex, eIndex, eIndices[eIndex]))
 
     return " ".join(buffer)
 
 def getCategory(linkTag):
-    if ":TRA" in linkTag:
-        return "sure"
-    elif linkTag.startswith("NTR") or linkTag.startswith("MTA"):
+    if linkTag.startswith("NTR") or linkTag.startswith("MTA") or linkTag.startswith("TIN"):
         return "ntr"
+    elif ":TRA" in linkTag:
+        return "sure"
     else:
         return "possible"
 
